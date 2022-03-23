@@ -1,0 +1,9 @@
+/*
+
+gps x, y ,z  13bytes, header: 0x01
+(mag, accel, gyro) (x, y ,z) * 3, hoz 41bytes, header: 0x02
+temp, hum, pressure 13bytes header: 0x03
+info battery, servos 9bytes header: 0x04
+
+
+*/
