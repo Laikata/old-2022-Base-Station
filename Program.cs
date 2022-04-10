@@ -80,9 +80,7 @@ class GPSPacket : PacketBase {
     public void Read(){
         byte[] data = buffer.readBytes(offset, 17);
         if(data.Length != 0) {
-            Console.WriteLine(offset);
             position = new float[3];
-            Console.WriteLine(BitConverter.ToString(data));
             position[0] = System.Buffers.Binary.BinaryPrimitives.ReadSingleBigEndian(data.AsSpan(1, 4));
             position[1] = System.Buffers.Binary.BinaryPrimitives.ReadSingleBigEndian(data.AsSpan(5, 4));
             position[2] = System.Buffers.Binary.BinaryPrimitives.ReadSingleBigEndian(data.AsSpan(9, 4));
@@ -133,15 +131,15 @@ class Program {
         List<ENVPacket> envPackets = new List<ENVPacket>();
 
         RingBuffer buffer = new RingBuffer();
+        Stream stdin = Console.OpenStandardInput();
 
         while(true) {
             // This reads from stdin and is used for testing only
-            Byte[] incoming_byte = new Byte[1];
-            Stream stdin = Console.OpenStandardInput();
-            int read_bytes = stdin.Read(incoming_byte, 0, 1);
-            buffer.Append(incoming_byte[0]); 
-            
-            if(incoming_byte[0] == 0x16) {
+            int read_result = stdin.ReadByte();
+            byte incoming_byte = (byte)read_result;
+            if(read_result != -1) buffer.Append(incoming_byte);
+
+            if(incoming_byte == 0x16) {
                 Console.WriteLine("New packet!");
                 initPackets.Add(new PacketBase(buffer, buffer.tip));
             }
@@ -158,9 +156,9 @@ class Program {
                 else initPackets[i].Init(gpsPackets, imuPackets, envPackets);
             }
             for(int i = gpsPackets.Count - 1; i >= 0; i--) {
-                if(gpsPackets[i].status == PacketStatus.OK) Console.WriteLine(gpsPackets[i].position[2]);
+                if(gpsPackets[i].status == PacketStatus.Rejected) gpsPackets.Remove(gpsPackets[i]);
+                if(gpsPackets[i].status == PacketStatus.OK) {Console.WriteLine(gpsPackets[i].position[2]); gpsPackets.Remove(gpsPackets[i]);}
                 else gpsPackets[i].Read();
-                if(gpsPackets[i].status == PacketStatus.OK || gpsPackets[i].status == PacketStatus.Rejected) gpsPackets.Remove(gpsPackets[i]);
             }
         }
     }
