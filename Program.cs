@@ -135,16 +135,24 @@ class Program {
         RingBuffer buffer = new RingBuffer();
 
         while(true) {
-            //byte incoming_byte = (byte)serialPort.ReadByte();
+            // This reads from stdin and is used for testing only
             Byte[] incoming_byte = new Byte[1];
             Stream stdin = Console.OpenStandardInput();
             int read_bytes = stdin.Read(incoming_byte, 0, 1);
-            buffer.Append(incoming_byte[0]);
+            buffer.Append(incoming_byte[0]); 
             
             if(incoming_byte[0] == 0x16) {
                 Console.WriteLine("New packet!");
                 initPackets.Add(new PacketBase(buffer, buffer.tip));
             }
+
+            /* byte incoming_byte = (byte)serialPort.ReadByte();
+            
+            if(incoming_byte == 0x16) {
+                Console.WriteLine("New packet!");
+                initPackets.Add(new PacketBase(buffer, buffer.tip));
+            } */
+            
             for(int i = initPackets.Count - 1; i >= 0; i--) {
                 if(initPackets[i].status == PacketStatus.OK || initPackets[i].status == PacketStatus.Rejected) initPackets.Remove(initPackets[i]);
                 else initPackets[i].Init(gpsPackets, imuPackets, envPackets);
