@@ -156,9 +156,9 @@ class Program {
                 else initPackets[i].Init(gpsPackets, imuPackets, envPackets);
             }
             for(int i = gpsPackets.Count - 1; i >= 0; i--) {
-                if(gpsPackets[i].status == PacketStatus.Rejected) gpsPackets.Remove(gpsPackets[i]);
-                if(gpsPackets[i].status == PacketStatus.OK) {Console.WriteLine(gpsPackets[i].position[2]); gpsPackets.Remove(gpsPackets[i]);}
-                else gpsPackets[i].Read();
+                if(gpsPackets[i].status == PacketStatus.Rejected) {gpsPackets.Remove(gpsPackets[i]);}
+                if(gpsPackets.Count > i && gpsPackets[i].status == PacketStatus.OK) {Console.WriteLine(gpsPackets[i].position[2]); gpsPackets.Remove(gpsPackets[i]);}
+                if(gpsPackets.Count > i && gpsPackets[i].status == PacketStatus.NotRead) gpsPackets[i].Read();
             }
         }
     }
