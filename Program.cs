@@ -35,20 +35,21 @@ class RingBuffer {
     }
 }
 enum PacketTypes {INIT, GPS, IMU, ENV, INFO}
+enum PacketStatus {NotRead, OK, Rejected};
 
 class PacketBase {
     public int packetSize;
     public int offset;
     public PacketTypes packetType;
     public RingBuffer buffer;
-    public bool completed;
+    public PacketStatus status;
 
     public PacketBase(RingBuffer pbuffer, int poffset){
         packetSize = 0;
         packetType = PacketTypes.INIT;
         offset = poffset;
         buffer = pbuffer;
-        completed = false;
+        status = PacketStatus.NotRead;
     }
 
     public void Init(List<GPSPacket> gpslist, List<IMUPacket> imulist, List<ENVPacket> envlist) {
@@ -61,10 +62,10 @@ class PacketBase {
             byte counter = data[1];
             byte packet_type = data[2];
             
-            if(packet_size == 20 && packet_type == 0x01) {gpslist.Add(new GPSPacket(buffer, offset)); completed = true;}
-            else if(packet_size == 48 && packet_type == 0x02) {imulist.Add(new IMUPacket(buffer, offset)); completed = true;}
-            else if(packet_size == 20 && packet_type == 0x03) {envlist.Add(new ENVPacket(buffer, offset)); completed = true;}
-            else Console.WriteLine("Rejected packet: Header/Size didn't match");
+            if(packet_size == 20 && packet_type == 0x01) {gpslist.Add(new GPSPacket(buffer, offset)); status = PacketStatus.OK;}
+            else if(packet_size == 48 && packet_type == 0x02) {imulist.Add(new IMUPacket(buffer, offset)); status = PacketStatus.OK;}
+            else if(packet_size == 20 && packet_type == 0x03) {envlist.Add(new ENVPacket(buffer, offset)); status = PacketStatus.OK;}
+            else {Console.WriteLine("Rejected packet: Header/Size didn't match"); status = PacketStatus.Rejected;}
         }
     }
 }
@@ -88,7 +89,7 @@ class GPSPacket : PacketBase {
 
             //TODO: Check CRC-32
 
-            completed = true;
+            status = PacketStatus.OK;
         }
     }
 }
@@ -141,12 +142,13 @@ class Program {
                 initPackets.Add(new PacketBase(buffer, buffer.tip));
             }
             for(int i = initPackets.Count - 1; i >= 0; i--) {
-                if(initPackets[i].completed) initPackets.Remove(initPackets[i]);
+                if(initPackets[i].status == PacketStatus.OK || initPackets[i].status == PacketStatus.Rejected) initPackets.Remove(initPackets[i]);
                 else initPackets[i].Init(gpsPackets, imuPackets, envPackets);
             }
             for(int i = gpsPackets.Count - 1; i >= 0; i--) {
-                if(gpsPackets[i].completed) {Console.WriteLine(gpsPackets[i].position[2]); gpsPackets.Remove(gpsPackets[i]);}
+                if(gpsPackets[i].status == PacketStatus.OK) Console.WriteLine(gpsPackets[i].position[2]);
                 else gpsPackets[i].Read();
+                if(gpsPackets[i].status == PacketStatus.OK || gpsPackets[i].status == PacketStatus.Rejected) gpsPackets.Remove(gpsPackets[i]);
             }
         }
     }
