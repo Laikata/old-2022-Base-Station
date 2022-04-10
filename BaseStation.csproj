@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Crc32.NET" Version="1.2.0" />
     <PackageReference Include="System.IO.Ports" Version="7.0.0-preview.2.22152.2" />
   </ItemGroup>
 

@@ -87,7 +87,11 @@ class GPSPacket : PacketBase {
             position[1] = System.Buffers.Binary.BinaryPrimitives.ReadSingleBigEndian(data.AsSpan(5, 4));
             position[2] = System.Buffers.Binary.BinaryPrimitives.ReadSingleBigEndian(data.AsSpan(9, 4));
 
-            //TODO: Check CRC-32
+            if(Force.Crc32.Crc32Algorithm.Compute(data, 0, 13) != System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(13, 4))) {
+                Console.WriteLine("Rejected package: Checksum mismatch");
+                status = PacketStatus.Rejected;
+                return;
+            }
 
             status = PacketStatus.OK;
         }
