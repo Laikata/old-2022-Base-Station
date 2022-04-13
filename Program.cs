@@ -112,6 +112,21 @@ class IMUPacket : PacketBase {
         gyro = new float[3];
         packetType = PacketTypes.IMU;
     }
+    public void Read() {
+        byte[] data = buffer.readBytes(offset, 45);
+        if (data.Length != 0) {
+            mag = UnpackVec(data.AsSpan(1,12));
+            accel = UnpackVec(data.AsSpan(14,12));
+            gyro = UnpackVec(data.AsSpan(24,12));
+
+            if(Force.Crc32.Crc32Algorithm.Compute(data, 0, 13) != System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(13, 4))) {
+                Console.WriteLine("Rejected package: Checksum mismatch");
+                status = PacketStatus.Rejected;
+                return;
+            }
+        }
+    }
+    
 }
 
 class ENVPacket : PacketBase {
