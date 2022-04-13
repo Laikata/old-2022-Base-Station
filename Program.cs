@@ -105,6 +105,7 @@ class IMUPacket : PacketBase {
     public float[] mag;
     public float[] accel;
     public float[] gyro;
+    public float hoz;
 
     public IMUPacket(RingBuffer pbuffer, int poffset): base(pbuffer, poffset) {
         mag = new float[3];
@@ -116,14 +117,17 @@ class IMUPacket : PacketBase {
         byte[] data = buffer.readBytes(offset, 45);
         if (data.Length != 0) {
             mag = UnpackVec(data.AsSpan(1,12));
-            accel = UnpackVec(data.AsSpan(14,12));
-            gyro = UnpackVec(data.AsSpan(24,12));
+            accel = UnpackVec(data.AsSpan(13,12));
+            gyro = UnpackVec(data.AsSpan(25,12));
+            hoz = System.Buffers.Binary.BinaryPrimitives.ReadSingleBigEndian(data.AsSpan(37,4));
 
-            if(Force.Crc32.Crc32Algorithm.Compute(data, 0, 13) != System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(13, 4))) {
+            if(Force.Crc32.Crc32Algorithm.Compute(data, 0, 41) != System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(13, 4))) {
                 Console.WriteLine("Rejected package: Checksum mismatch");
                 status = PacketStatus.Rejected;
                 return;
             }
+
+            status = PacketStatus.OK;
         }
     }
     
@@ -179,6 +183,11 @@ class Program {
                 if(gpsPackets[i].status == PacketStatus.Rejected) {gpsPackets.Remove(gpsPackets[i]);}
                 if(gpsPackets.Count > i && gpsPackets[i].status == PacketStatus.OK) {Console.WriteLine(gpsPackets[i].position[2]); gpsPackets.Remove(gpsPackets[i]);}
                 if(gpsPackets.Count > i && gpsPackets[i].status == PacketStatus.NotRead) gpsPackets[i].Read();
+            }
+            for(int i = imuPackets.Count - 1; i >= 0; i--) {
+                if(imuPackets[i].status == PacketStatus.Rejected) {imuPackets.Remove(imuPackets[i]);}
+                if(imuPackets.Count > i && imuPackets[i].status == PacketStatus.OK) {Console.WriteLine(imuPackets[i].gyro[0]); imuPackets.Remove(imuPackets[i]);}
+                if(imuPackets.Count > i && imuPackets[i].status == PacketStatus.NotRead) imuPackets[i].Read();
             }
         }
     }
