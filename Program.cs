@@ -68,6 +68,14 @@ class PacketBase {
             else {Console.WriteLine("Rejected packet: Header/Size didn't match"); status = PacketStatus.Rejected;}
         }
     }
+
+    protected float[] UnpackVec(Span<byte> data) {
+        float[] unpacked_vec = new float[3];
+        for(int i = 0; i < 3; i++) {
+            unpacked_vec[i] = System.Buffers.Binary.BinaryPrimitives.ReadSingleBigEndian(data.Slice(i*4, 4));
+        }
+        return unpacked_vec;
+    }
 }
 
 class GPSPacket : PacketBase {
@@ -80,10 +88,7 @@ class GPSPacket : PacketBase {
     public void Read(){
         byte[] data = buffer.readBytes(offset, 17);
         if(data.Length != 0) {
-            position = new float[3];
-            position[0] = System.Buffers.Binary.BinaryPrimitives.ReadSingleBigEndian(data.AsSpan(1, 4));
-            position[1] = System.Buffers.Binary.BinaryPrimitives.ReadSingleBigEndian(data.AsSpan(5, 4));
-            position[2] = System.Buffers.Binary.BinaryPrimitives.ReadSingleBigEndian(data.AsSpan(9, 4));
+            position = UnpackVec(data.AsSpan(1,12));
 
             if(Force.Crc32.Crc32Algorithm.Compute(data, 0, 13) != System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(13, 4))) {
                 Console.WriteLine("Rejected package: Checksum mismatch");
