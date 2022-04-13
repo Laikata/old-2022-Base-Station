@@ -163,17 +163,14 @@ class Program {
             byte incoming_byte = (byte)read_result;
             if(read_result != -1) buffer.Append(incoming_byte);
 
+            /* int read_result = stdin.ReadByte();
+            byte incoming_byte = (byte)read_result;
+            if(read_result != -1) buffer.Append(incoming_byte);
+            */
             if(incoming_byte == 0x16) {
                 Console.WriteLine("New packet!");
                 initPackets.Add(new PacketBase(buffer, buffer.tip));
             }
-
-            /* byte incoming_byte = (byte)serialPort.ReadByte();
-            
-            if(incoming_byte == 0x16) {
-                Console.WriteLine("New packet!");
-                initPackets.Add(new PacketBase(buffer, buffer.tip));
-            } */
             
             for(int i = initPackets.Count - 1; i >= 0; i--) {
                 if(initPackets[i].status == PacketStatus.OK || initPackets[i].status == PacketStatus.Rejected) initPackets.Remove(initPackets[i]);
