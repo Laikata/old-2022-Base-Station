@@ -144,6 +144,22 @@ class ENVPacket : PacketBase {
         pressure = 0.0f;
         packetType = PacketTypes.GPS;
     }
+    public void Read(){
+        byte[] data = buffer.readBytes(offset, 17);
+        if(data.Length != 0) {
+            temp = System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(1, 4));
+            hum = System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(5, 4));
+            pressure = System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(9, 4));
+
+            if(Force.Crc32.Crc32Algorithm.Compute(data, 0, 13) != System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(13, 4))) {
+                Console.WriteLine("Rejected package: Checksum mismatch");
+                status = PacketStatus.Rejected;
+                return;
+            }
+
+            status = PacketStatus.OK;
+        }
+    }
 }
 
 class Program {
@@ -185,6 +201,11 @@ class Program {
                 if(imuPackets[i].status == PacketStatus.Rejected) {imuPackets.Remove(imuPackets[i]);}
                 if(imuPackets.Count > i && imuPackets[i].status == PacketStatus.OK) {Console.WriteLine(imuPackets[i].gyro[0]); imuPackets.Remove(imuPackets[i]);}
                 if(imuPackets.Count > i && imuPackets[i].status == PacketStatus.NotRead) imuPackets[i].Read();
+            }
+            for(int i = envPackets.Count - 1; i >= 0; i--) {
+                if(envPackets[i].status == PacketStatus.Rejected) {envPackets.Remove(envPackets[i]);}
+                if(envPackets.Count > i && envPackets[i].status == PacketStatus.OK) {Console.WriteLine(envPackets[i].temp); envPackets.Remove(envPackets[i]);}
+                if(envPackets.Count > i && envPackets[i].status == PacketStatus.NotRead) envPackets[i].Read();
             }
         }
     }
