@@ -62,9 +62,9 @@ class PacketBase {
             byte counter = data[1];
             byte packet_type = data[2];
             
-            if(packet_size == 20 && packet_type == 0x01) {gpslist.Add(new GPSPacket(buffer, offset)); status = PacketStatus.OK;}
-            else if(packet_size == 48 && packet_type == 0x02) {imulist.Add(new IMUPacket(buffer, offset)); status = PacketStatus.OK;}
-            else if(packet_size == 20 && packet_type == 0x03) {envlist.Add(new ENVPacket(buffer, offset)); status = PacketStatus.OK;}
+            if(packet_size == 13 && packet_type == 0x01) {gpslist.Add(new GPSPacket(buffer, offset)); status = PacketStatus.OK;}
+            else if(packet_size == 41 && packet_type == 0x02) {imulist.Add(new IMUPacket(buffer, offset)); status = PacketStatus.OK;}
+            else if(packet_size == 13 && packet_type == 0x03) {envlist.Add(new ENVPacket(buffer, offset)); status = PacketStatus.OK;}
             else {Console.WriteLine("Rejected packet: Header/Size didn't match"); status = PacketStatus.Rejected;}
         }
     }
@@ -121,7 +121,7 @@ class IMUPacket : PacketBase {
             gyro = UnpackVec(data.AsSpan(25,12));
             hoz = System.Buffers.Binary.BinaryPrimitives.ReadSingleBigEndian(data.AsSpan(37,4));
 
-            if(Force.Crc32.Crc32Algorithm.Compute(data, 0, 41) != System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(13, 4))) {
+            if(Force.Crc32.Crc32Algorithm.Compute(data, 0, 41) != System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(41, 4))) {
                 Console.WriteLine("Rejected package: Checksum mismatch");
                 status = PacketStatus.Rejected;
                 return;
@@ -142,7 +142,7 @@ class ENVPacket : PacketBase {
         temp = 0.0f;
         hum = 0.0f;
         pressure = 0.0f;
-        packetType = PacketTypes.GPS;
+        packetType = PacketTypes.ENV;
     }
     public void Read(){
         byte[] data = buffer.readBytes(offset, 17);
