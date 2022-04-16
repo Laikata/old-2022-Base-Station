@@ -3,7 +3,7 @@
 class RingBuffer {
     Byte[] buffer;
     public int tip{get; private set;}
-    const int RING_BUFFER_SIZE = 256;
+    const int RING_BUFFER_SIZE = 65536;
 
     public RingBuffer() {
         buffer = new Byte[RING_BUFFER_SIZE];
