@@ -177,35 +177,38 @@ class Program {
             // This reads from stdin and is used for testing only
             int read_result = stdin.ReadByte();
             byte incoming_byte = (byte)read_result;
-            if(read_result != -1) buffer.Append(incoming_byte);
+            if(read_result != -1) {
+                buffer.Append(incoming_byte);
 
             /* int read_result = stdin.ReadByte();
             byte incoming_byte = (byte)read_result;
-            if(read_result != -1) buffer.Append(incoming_byte);
+            if(read_result != -1) {
+                buffer.Append(incoming_byte);
             */
-            if(incoming_byte == 0x16) {
-                Console.WriteLine("New packet!");
-                initPackets.Add(new PacketBase(buffer, buffer.tip));
-            }
-            
-            for(int i = initPackets.Count - 1; i >= 0; i--) {
-                if(initPackets[i].status == PacketStatus.OK || initPackets[i].status == PacketStatus.Rejected) initPackets.Remove(initPackets[i]);
-                else initPackets[i].Init(gpsPackets, imuPackets, envPackets);
-            }
-            for(int i = gpsPackets.Count - 1; i >= 0; i--) {
-                if(gpsPackets[i].status == PacketStatus.Rejected) {gpsPackets.Remove(gpsPackets[i]);}
-                if(gpsPackets.Count > i && gpsPackets[i].status == PacketStatus.OK) {Console.WriteLine(gpsPackets[i].position[2]); gpsPackets.Remove(gpsPackets[i]);}
-                if(gpsPackets.Count > i && gpsPackets[i].status == PacketStatus.NotRead) gpsPackets[i].Read();
-            }
-            for(int i = imuPackets.Count - 1; i >= 0; i--) {
-                if(imuPackets[i].status == PacketStatus.Rejected) {imuPackets.Remove(imuPackets[i]);}
-                if(imuPackets.Count > i && imuPackets[i].status == PacketStatus.OK) {Console.WriteLine(imuPackets[i].gyro[0]); imuPackets.Remove(imuPackets[i]);}
-                if(imuPackets.Count > i && imuPackets[i].status == PacketStatus.NotRead) imuPackets[i].Read();
-            }
-            for(int i = envPackets.Count - 1; i >= 0; i--) {
-                if(envPackets[i].status == PacketStatus.Rejected) {envPackets.Remove(envPackets[i]);}
-                if(envPackets.Count > i && envPackets[i].status == PacketStatus.OK) {Console.WriteLine(envPackets[i].temp); envPackets.Remove(envPackets[i]);}
-                if(envPackets.Count > i && envPackets[i].status == PacketStatus.NotRead) envPackets[i].Read();
+                if(incoming_byte == 0x16) {
+                    Console.WriteLine("New packet!");
+                    initPackets.Add(new PacketBase(buffer, buffer.tip));
+                }
+                
+                for(int i = initPackets.Count - 1; i >= 0; i--) {
+                    if(initPackets[i].status == PacketStatus.OK || initPackets[i].status == PacketStatus.Rejected) initPackets.Remove(initPackets[i]);
+                    else initPackets[i].Init(gpsPackets, imuPackets, envPackets);
+                }
+                for(int i = gpsPackets.Count - 1; i >= 0; i--) {
+                    if(gpsPackets[i].status == PacketStatus.Rejected) {gpsPackets.Remove(gpsPackets[i]);}
+                    if(gpsPackets.Count > i && gpsPackets[i].status == PacketStatus.OK) {Console.WriteLine(gpsPackets[i].position[2]); gpsPackets.Remove(gpsPackets[i]);}
+                    if(gpsPackets.Count > i && gpsPackets[i].status == PacketStatus.NotRead) gpsPackets[i].Read();
+                }
+                for(int i = imuPackets.Count - 1; i >= 0; i--) {
+                    if(imuPackets[i].status == PacketStatus.Rejected) {imuPackets.Remove(imuPackets[i]);}
+                    if(imuPackets.Count > i && imuPackets[i].status == PacketStatus.OK) {Console.WriteLine(imuPackets[i].gyro[0]); imuPackets.Remove(imuPackets[i]);}
+                    if(imuPackets.Count > i && imuPackets[i].status == PacketStatus.NotRead) imuPackets[i].Read();
+                }
+                for(int i = envPackets.Count - 1; i >= 0; i--) {
+                    if(envPackets[i].status == PacketStatus.Rejected) {envPackets.Remove(envPackets[i]);}
+                    if(envPackets.Count > i && envPackets[i].status == PacketStatus.OK) {Console.WriteLine(envPackets[i].temp); envPackets.Remove(envPackets[i]);}
+                    if(envPackets.Count > i && envPackets[i].status == PacketStatus.NotRead) envPackets[i].Read();
+                }
             }
         }
     }
