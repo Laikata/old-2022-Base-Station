@@ -3,7 +3,7 @@
 class RingBuffer {
     Byte[] buffer;
     public int tip{get; private set;}
-    const int RING_BUFFER_SIZE = 65536;
+    const int RING_BUFFER_SIZE = 256;
 
     public RingBuffer() {
         buffer = new Byte[RING_BUFFER_SIZE];
@@ -11,12 +11,14 @@ class RingBuffer {
     }
 
     public Byte[] readBytes(int offset, int amount) {
-        if(offset + amount > (RING_BUFFER_SIZE - 1)) {
-            if(tip > offset && ((offset + amount) % RING_BUFFER_SIZE) < tip) {
-                return new byte[0];
-            }
+        int distance = Math.Abs(offset - tip);
+
+        if(distance > RING_BUFFER_SIZE / 2) {
+            // The buffer has overflowed
+            distance = Math.Abs(offset - (tip + RING_BUFFER_SIZE - 1));
         }
-        if(offset + amount > tip) {
+        
+        if(distance < amount) {
             return new byte[0];
         }
 
