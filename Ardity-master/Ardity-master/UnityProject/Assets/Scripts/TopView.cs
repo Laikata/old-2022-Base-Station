@@ -17,7 +17,6 @@ public class TopView : MonoBehaviour
 
     private LineRenderer line;
 
-    public Vector3 testPos;
 
     private List<Vector3> allPositions;
 
@@ -26,7 +25,6 @@ public class TopView : MonoBehaviour
     {
         line = gameObject.GetComponent<LineRenderer>();
 
-        testPos = new Vector3(5, 5);
 
         allPositions = new List<Vector3>();
     }
@@ -37,7 +35,7 @@ public class TopView : MonoBehaviour
         Vector3 newPos = new Vector3(0, 0, 0);
 
         newPos.x = ((pos.x - minX) * (maxDisplayX - 0) / (maxX - minX) + 0) + transform.position.x;
-        newPos.y = (pos.y - minY) * (maxDisplayY - 0) / (maxY - minY) + 0 + transform.position.y;
+        newPos.y = ((pos.y - minY) * (maxDisplayY - 0) / (maxY - minY) + 0) + transform.position.y;
 
         return newPos;
     }
@@ -45,14 +43,7 @@ public class TopView : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Random.value < 0.005)
-        {
-            testPos.x += Random.Range(-0.00002f, 0.00005f);
-            testPos.y += Random.Range(-0.00002f, 0.00005f);
-
-
-            AddPoint(testPos);
-        }
+        // addPoint(new Vector3(Random.Range(-1234324, 121233), Random.Range(-1234324, 121233), 0));
     }
 
     void UpdatePoints()
@@ -72,7 +63,7 @@ public class TopView : MonoBehaviour
         
     }
 
-    void AddPoint(Vector3 pos)
+    public void addPoint(Vector3 pos)
     {
         Debug.Log(pos.ToString());
 

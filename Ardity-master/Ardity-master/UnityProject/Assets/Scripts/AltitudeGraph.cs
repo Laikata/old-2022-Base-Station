@@ -16,7 +16,6 @@ public class AltitudeGraph : MonoBehaviour
 
     private LineRenderer line;
 
-    public Vector3 testPos;
 
     private List<Vector3> allPositions;
 
@@ -25,7 +24,6 @@ public class AltitudeGraph : MonoBehaviour
     {
         line = gameObject.GetComponent<LineRenderer>();
 
-        testPos = new Vector3(5, 1500);
 
         allPositions = new List<Vector3>();
     }
@@ -36,7 +34,7 @@ public class AltitudeGraph : MonoBehaviour
         Vector3 newPos = new Vector3(0, 0, 0);
 
         newPos.x = ((pos.x - minX) * (maxDisplayX - 0) / (maxX - minX) + 0) + transform.position.x;
-        newPos.y = (pos.y - minY) * (maxDisplayY - 0) / (maxY - minY) + 0 + transform.position.y;
+        newPos.y = ((pos.y - minY) * (maxDisplayY - 0) / (maxY - minY) + 0) + transform.position.y;
 
         return newPos;
     }
@@ -44,13 +42,7 @@ public class AltitudeGraph : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Random.value < 0.005f && testPos.y >= 0)
-        {
-            testPos.y -= Random.Range(20f, 60f);
 
-
-            AddPoint(testPos.y);
-        }
     }
 
     void UpdatePoints()
@@ -70,7 +62,7 @@ public class AltitudeGraph : MonoBehaviour
 
     }
 
-    void AddPoint(float altitude)
+    public void addPoint(float altitude)
     {
         Debug.Log(altitude.ToString());
 

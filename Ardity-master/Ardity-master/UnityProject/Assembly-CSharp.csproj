@@ -67,6 +67,8 @@
     <Compile Include="Assets\Ardity\Scripts\Threads\SerialThread.cs" />
     <Compile Include="Assets\Ardity\Scripts\SerialControllerCustomDelimiter.cs" />
     <Compile Include="Assets\Scripts\TopView.cs" />
+    <Compile Include="Assets\Scripts\DataReceiver.cs" />
+    <Compile Include="Assets\Scripts\PacketParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
