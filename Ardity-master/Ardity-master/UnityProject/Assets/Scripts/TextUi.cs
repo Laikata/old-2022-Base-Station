@@ -7,8 +7,8 @@ using TMPro;
 public class TextUi : MonoBehaviour
 {
 
-    public GameObject mapObject;
-    public GameObject altitudeGraph;
+    public TopView mapObject;
+    public AltitudeGraph altitudeGraph;
 
 
     private TMP_Text infoText;
@@ -58,8 +58,8 @@ public class TextUi : MonoBehaviour
                       + "temp: " + temp.ToString() + " humidity: " + hum.ToString() + " pressure: " + pressure.ToString();
 
 
-        mapObject.GetComponent<TopView>().addPoint(canPos);
+        mapObject.addPoint(canPos);
 
-        altitudeGraph.GetComponent<AltitudeGraph>().addPoint(canPos.z);
+        altitudeGraph.addPoint(canPos.z);
     }
 }
