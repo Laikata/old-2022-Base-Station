@@ -64,7 +64,6 @@ public class AltitudeGraph : MonoBehaviour
 
     public void addPoint(float altitude)
     {
-        Debug.Log(altitude.ToString());
 
         allPositions.Add(new Vector3(gameObject.transform.childCount, altitude, 0));
 

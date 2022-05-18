@@ -57,6 +57,7 @@ public class TopView : MonoBehaviour
             Vector3 newPos = mapPosition(allPositions[i]);
 
             line.SetPosition(i, newPos);
+            
 
             currentDot.transform.position = newPos;
         }
@@ -65,6 +66,12 @@ public class TopView : MonoBehaviour
 
     public void addPoint(Vector3 pos)
     {
+
+        if (pos == Vector3.zero)
+        {
+            return;
+        }
+
         Debug.Log(pos.ToString());
 
         allPositions.Add(new Vector3(pos.x, pos.y, 0));

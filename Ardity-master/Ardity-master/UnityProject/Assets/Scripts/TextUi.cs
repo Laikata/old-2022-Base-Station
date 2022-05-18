@@ -7,6 +7,8 @@ using TMPro;
 public class TextUi : MonoBehaviour
 {
 
+    public int formatSize = 10;
+
     public TopView mapObject;
     public AltitudeGraph altitudeGraph;
 
@@ -15,7 +17,7 @@ public class TextUi : MonoBehaviour
 
     public Vector3 canPos, mag, accel, gyro;
 
-    public float temp, hum, pressure;
+    public float temp, hum, pressure, bat;
 
 
     // Start is called before the first frame update
@@ -38,10 +40,11 @@ public class TextUi : MonoBehaviour
         UpdateData();
     }
 
-    public void updateTempAndPres(float newTemp, float newHum)
+    public void updateEnv(float newTemp, float newHum, float newPres)
     {
         temp = newTemp;
         hum = newHum;
+        pressure = newPres;
         UpdateData();
     }
 
@@ -50,12 +53,49 @@ public class TextUi : MonoBehaviour
     void Update( ) {
     }
 
+    string formatFloat(float input)
+    {
+        string result = "";
+
+        if (input >= 0)
+        {
+            result += " ";
+        }
+
+        result += input.ToString();
+
+
+
+        while (result.Length < formatSize)
+        {
+            result += " ";
+        }
+
+
+        return result;
+    }
+
+    string formatVector(Vector3 input, string name)
+    {
+        string result = "";
+        result += name + ": ";
+
+        result += formatFloat(input.x) + " / ";
+        result += formatFloat(input.y) + " / ";
+        result += formatFloat(input.z) + " / ";
+
+        result += "\n";
+
+        return result;
+
+    }
+
     void UpdateData() {
 
 
-        infoText.text = "<mspace=0.55em> can position: " + canPos.x.ToString() + " " + canPos.y.ToString() + " " + canPos.z.ToString() + " " + "\n"
-                      + "mag: " + mag.ToString() + "\naccel: " + accel.ToString() + "\ngyro: " + gyro.ToString() + "\n"
-                      + "temp: " + temp.ToString() + " humidity: " + hum.ToString() + " pressure: " + pressure.ToString();
+        infoText.text = "<mspace=0.55em>" + formatVector(canPos, "pos  ") + formatVector(mag, "mag  ") + formatVector(accel, "accel") + formatVector(gyro, "gyro ")
+                        + "temp: " + formatFloat(temp) + " humidity: " + formatFloat(hum) + " pressure: " + formatFloat(pressure)
+            ;
 
 
         mapObject.addPoint(canPos);
