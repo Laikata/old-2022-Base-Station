@@ -31,7 +31,7 @@ public class TextUi : MonoBehaviour
     {
         infoText = gameObject.GetComponent<TMP_Text>();
 
-        string path = Application.dataPath + "/Data/" + "savedData" + System.DateTime.UtcNow.ToString("HH_mm_ss__dd_MMMM") + ".csv";
+        string path = Application.dataPath + "savedData" + System.DateTime.UtcNow.ToString("HH_mm_ss__dd_MMMM") + ".csv";
         writer = new StreamWriter(path);
 
         writer.WriteLine("Time,PosX,PosY,Altitude,MagX,MagY,MagZ,AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,Tmp,Hum,Press");
@@ -71,6 +71,7 @@ public class TextUi : MonoBehaviour
         {
             Application.Quit();
         }
+
 
         currentPort = portInput.text;
         if (!connected) {
@@ -128,7 +129,7 @@ public class TextUi : MonoBehaviour
     void UpdateData() {
 
         infoText.text = "<mspace=0.55em>" + formatVector(canPos, "pos  ") + formatVector(mag, "mag  ") + formatVector(accel, "accel") + formatVector(gyro, "gyro ")
-                        + "temp: " + formatFloat(temp) + " humidity: " + formatFloat(hum) + " pressure: " + formatFloat(pressure) + " bat: " + formatFloat(bat)
+                        + "temp: " + formatFloat(temp) + " humidity: " + formatFloat(hum) + "\npressure: " + formatFloat(pressure) + " bat: " + formatFloat(bat)
             ;
 
 
