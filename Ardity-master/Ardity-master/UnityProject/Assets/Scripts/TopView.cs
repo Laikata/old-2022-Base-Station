@@ -37,6 +37,9 @@ public class TopView : MonoBehaviour
         newPos.x = ((pos.x - minX) * (maxDisplayX - 0) / (maxX - minX) + 0) + transform.position.x;
         newPos.y = ((pos.y - minY) * (maxDisplayY - 0) / (maxY - minY) + 0) + transform.position.y;
 
+        if (float.IsNaN(newPos.x)) { newPos.x = 0; }
+        if(float.IsNaN(newPos.y)) { newPos.y = 0; }
+
         return newPos;
     }
 
