@@ -470,7 +470,7 @@ public class ParserThread
                 for (int i = gpsPackets.Count - 1; i >= 0; i--)
                 {
                     if (gpsPackets[i].status == PacketStatus.Rejected) { gpsPackets.Remove(gpsPackets[i]); }
-                    else if (gpsPackets.Count > i && gpsPackets[i].status == PacketStatus.OK)
+                    else if (gpsPackets[i].status == PacketStatus.OK)
                     {
                         lock (gpsLock)
                         {
@@ -480,12 +480,12 @@ public class ParserThread
                         gpsPackets.Remove(gpsPackets[i]);
 
                     }
-                    else if (gpsPackets.Count > i && gpsPackets[i].status == PacketStatus.NotRead) gpsPackets[i].Read();
+                    else if (gpsPackets[i].status == PacketStatus.NotRead) gpsPackets[i].Read();
                 }
                 for (int i = imuPackets.Count - 1; i >= 0; i--)
                 {
                     if (imuPackets[i].status == PacketStatus.Rejected) { imuPackets.Remove(imuPackets[i]); }
-                    else if(imuPackets.Count > i && imuPackets[i].status == PacketStatus.OK)
+                    else if(imuPackets[i].status == PacketStatus.OK)
                     {
                         lock (imuLock)
                         {
@@ -496,12 +496,12 @@ public class ParserThread
                         }
                         imuPackets.Remove(imuPackets[i]);
                     }
-                    else if(imuPackets.Count > i && imuPackets[i].status == PacketStatus.NotRead) imuPackets[i].Read();
+                    else if(imuPackets[i].status == PacketStatus.NotRead) imuPackets[i].Read();
                 }
                 for (int i = envPackets.Count - 1; i >= 0; i--)
                 {
                     if (envPackets[i].status == PacketStatus.Rejected) { envPackets.Remove(envPackets[i]); }
-                    else if(envPackets.Count > i && envPackets[i].status == PacketStatus.OK)
+                    else if(envPackets[i].status == PacketStatus.OK)
                     {
                         lock (envLock)
                         {
@@ -513,12 +513,12 @@ public class ParserThread
                         Debug.Log("OK ENV");
                         envPackets.Remove(envPackets[i]);
                     }
-                    else if(envPackets.Count > i && envPackets[i].status == PacketStatus.NotRead) envPackets[i].Read();
+                    else if(envPackets[i].status == PacketStatus.NotRead) envPackets[i].Read();
                 }
                 for (int i = batPackets.Count - 1; i >= 0; i--)
                 {
                     if (batPackets[i].status == PacketStatus.Rejected) { batPackets.Remove(batPackets[i]); }
-                    else if (batPackets.Count > i && batPackets[i].status == PacketStatus.OK)
+                    else if (batPackets[i].status == PacketStatus.OK)
                     {
                         lock (batLock)
                         {
@@ -528,7 +528,7 @@ public class ParserThread
                         Debug.Log("OK BAT");
                         batPackets.Remove(batPackets[i]);
                     }
-                    else if (batPackets.Count > i && batPackets[i].status == PacketStatus.NotRead) batPackets[i].Read();
+                    else if (batPackets[i].status == PacketStatus.NotRead) batPackets[i].Read();
                 }
             }
         }
