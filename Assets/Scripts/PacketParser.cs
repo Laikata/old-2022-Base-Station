@@ -46,7 +46,7 @@ class RingBuffer
         tip = (tip + 1) % RING_BUFFER_SIZE;
     }
 }
-enum PacketTypes { INIT, GPS, IMU, ENV, INFO }
+enum PacketTypes { INIT, GPS, IMU, ENV, BAT }
 enum PacketStatus { NotRead, OK, Rejected };
 
 class PacketBase
@@ -66,7 +66,7 @@ class PacketBase
         status = PacketStatus.NotRead;
     }
 
-    public void Init(List<GPSPacket> gpslist, List<IMUPacket> imulist, List<ENVPacket> envlist)
+    public void Init(List<GPSPacket> gpslist, List<IMUPacket> imulist, List<ENVPacket> envlist, List<BATPacket> batlist)
     {
         // Counter + Size + Protocol Header
         byte[] data = buffer.readBytes(offset, 3);
@@ -81,6 +81,7 @@ class PacketBase
             if (packet_size == 13 && packet_type == 0x01) { gpslist.Add(new GPSPacket(buffer, offset)); status = PacketStatus.OK; }
             else if (packet_size == 41 && packet_type == 0x02) { imulist.Add(new IMUPacket(buffer, offset)); status = PacketStatus.OK; }
             else if (packet_size == 13 && packet_type == 0x03) { envlist.Add(new ENVPacket(buffer, offset)); status = PacketStatus.OK; }
+            else if (packet_size == 5 && packet_type == 0x04) { batlist.Add(new BATPacket(buffer, offset)); status = PacketStatus.OK; }
             else { Debug.Log("Rejected packet: Header/Size didn't match"); status = PacketStatus.Rejected; }
         }
     }
@@ -108,7 +109,6 @@ class PacketBase
 class GPSPacket : PacketBase
 {
     public Vector3 position;
-    
 
     public GPSPacket(RingBuffer pbuffer, int poffset) : base(pbuffer, poffset)
     {
@@ -212,9 +212,37 @@ class ENVPacket : PacketBase
 
             status = PacketStatus.OK;
 
-
         }
+    }
+}
 
+class BATPacket : PacketBase
+{
+    public float voltage;
+
+    public BATPacket(RingBuffer pbuffer, int poffset) : base(pbuffer, poffset)
+    {
+        voltage = 0.0f;
+        packetType = PacketTypes.BAT;
+    }
+    public void Read()
+    {
+        const int size = 9;
+        byte[] data = buffer.readBytes(offset, size);
+        if (data.Length != 0)
+        {
+            if (!CheckCRC32(data, size))
+            {
+                Debug.Log("Rejected package: Checksum mismatch");
+                status = PacketStatus.Rejected;
+                return;
+            }
+
+            if (System.BitConverter.IsLittleEndian) System.Array.Reverse(data, 1, 4);
+            voltage = System.BitConverter.ToSingle(data, 1);
+
+            status = PacketStatus.OK;
+        }
     }
 }
 
@@ -317,7 +345,6 @@ public class PacketParser : MonoBehaviour
 
     private void Update()
     {
-        //TODO: Communicate with thread
         if (parserThread.updatedGps)
         {
             lock(parserThread.gpsLock)
@@ -341,6 +368,14 @@ public class PacketParser : MonoBehaviour
                 uiText.updateEnv(parserThread.env[0], parserThread.env[1], parserThread.env[2]);
             }
         }
+
+        if (parserThread.updatedBat)
+        {
+            lock (parserThread.batLock)
+            {
+                uiText.UpdateBat(parserThread.bat);
+            }
+        }
     }
 
     void OnDisable()
@@ -356,6 +391,7 @@ public class ParserThread
     List<GPSPacket> gpsPackets;
     List<IMUPacket> imuPackets;
     List<ENVPacket> envPackets;
+    List<BATPacket> batPackets;
     RingBuffer buffer;
     TextUi textUI;
 
@@ -368,6 +404,9 @@ public class ParserThread
     public object envLock = new object();
     public float[] env = {0.0f, 0.0f, 0.0f};
     public bool updatedEnv;
+    public object batLock = new object();
+    public float bat = 0.0f;
+    public bool updatedBat;
 
     public bool connected;
 
@@ -382,6 +421,7 @@ public class ParserThread
         gpsPackets = new List<GPSPacket>();
         imuPackets = new List<IMUPacket>();
         envPackets = new List<ENVPacket>();
+        batPackets = new List<BATPacket>();
         buffer = new RingBuffer();
         isStopped = false;
         updatedGps = false;
@@ -425,7 +465,7 @@ public class ParserThread
                 for (int i = initPackets.Count - 1; i >= 0; i--)
                 {
                     if (initPackets[i].status == PacketStatus.OK || initPackets[i].status == PacketStatus.Rejected) initPackets.Remove(initPackets[i]);
-                    else initPackets[i].Init(gpsPackets, imuPackets, envPackets);
+                    else initPackets[i].Init(gpsPackets, imuPackets, envPackets, batPackets);
                 }
                 for (int i = gpsPackets.Count - 1; i >= 0; i--)
                 {
@@ -474,6 +514,21 @@ public class ParserThread
                         envPackets.Remove(envPackets[i]);
                     }
                     else if(envPackets.Count > i && envPackets[i].status == PacketStatus.NotRead) envPackets[i].Read();
+                }
+                for (int i = batPackets.Count - 1; i >= 0; i--)
+                {
+                    if (batPackets[i].status == PacketStatus.Rejected) { batPackets.Remove(batPackets[i]); }
+                    else if (batPackets.Count > i && batPackets[i].status == PacketStatus.OK)
+                    {
+                        lock (batLock)
+                        {
+                            bat = batPackets[i].voltage;
+                            updatedBat = true;
+                        }
+                        Debug.Log("OK BAT");
+                        batPackets.Remove(batPackets[i]);
+                    }
+                    else if (batPackets.Count > i && batPackets[i].status == PacketStatus.NotRead) batPackets[i].Read();
                 }
             }
         }
