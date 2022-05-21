@@ -431,21 +431,36 @@ public class ParserThread
 
     }
 
+    IEnumerator waiter()
+    {
+        yield return new WaitForSeconds(2);
+
+    }
+
     public void Run()
     {
-        
+        int timer = 0;
         while (!textUI.connected)
         {
-            try
-            {
-                serialPort = new SerialPort(textUI.currentPort, 9600);
-                serialPort.Open();
-                textUI.connected = true;
-            } catch
-            {
+            if (timer > 1000000000) {
 
+                Debug.Log("attempting to connect");
+                try
+                {
+                    serialPort = new SerialPort(textUI.currentPort, 9600);
+                    serialPort.Open();
+                    textUI.error = false;
+                    textUI.connected = true;
+                }
+                catch
+                {
+                    textUI.error = true;
+                }
+
+                timer = 0;
             }
 
+            timer++;
         }
 
 

@@ -26,6 +26,7 @@ public class TextUi : MonoBehaviour
     public string currentPort;
 
     public bool connected = false;
+    public bool error = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -74,9 +75,15 @@ public class TextUi : MonoBehaviour
 
 
         currentPort = portInput.text;
+
+
         if (!connected) {
             infoText.text = "Not connected!!";
         }
+/*        if (error)
+        {
+            infoText.text = "ERROR!";
+        }*/
     }
 
     string formatFloat(float input)
