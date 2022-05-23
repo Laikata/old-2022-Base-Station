@@ -463,6 +463,7 @@ public class ParserThread
             timer++;
         }
 
+        Debug.Log("connected");
 
         while (!isStopped)
         {

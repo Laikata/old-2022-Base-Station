@@ -6,7 +6,6 @@ using TMPro;
 using System.Text;
 using System.IO;
 using System;
-
 public class TextUi : MonoBehaviour
 {
 
@@ -63,6 +62,13 @@ public class TextUi : MonoBehaviour
     public void UpdateBat(float newBat)
     {
         bat = newBat;
+    }
+
+    private float calculateAltitude()
+    {
+
+        return 44330 * (1- Mathf.Pow((pressure/1015), 1f/5.255f));
+
     }
 
     // Update is called once per frame
@@ -137,6 +143,7 @@ public class TextUi : MonoBehaviour
 
         infoText.text = "<mspace=0.55em>" + formatVector(canPos, "pos  ") + formatVector(mag, "mag  ") + formatVector(accel, "accel") + formatVector(gyro, "gyro ")
                         + "temp: " + formatFloat(temp) + " humidity: " + formatFloat(hum) + "\npressure: " + formatFloat(pressure) + " bat: " + formatFloat(bat)
+                        + "\naltitude: " + formatFloat(calculateAltitude());
             ;
 
 
