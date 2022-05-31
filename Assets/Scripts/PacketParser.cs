@@ -78,7 +78,7 @@ class PacketBase
             byte counter = data[1];
             byte packet_type = data[2];
 
-            if (packet_size == 13 && packet_type == 0x01) { gpslist.Add(new GPSPacket(buffer, offset)); status = PacketStatus.OK; }
+            if (packet_size == 25 && packet_type == 0x01) { gpslist.Add(new GPSPacket(buffer, offset)); status = PacketStatus.OK; }
             else if (packet_size == 41 && packet_type == 0x02) { imulist.Add(new IMUPacket(buffer, offset)); status = PacketStatus.OK; }
             else if (packet_size == 13 && packet_type == 0x03) { envlist.Add(new ENVPacket(buffer, offset)); status = PacketStatus.OK; }
             else if (packet_size == 5 && packet_type == 0x04) { batlist.Add(new BATPacket(buffer, offset)); status = PacketStatus.OK; }
@@ -98,6 +98,17 @@ class PacketBase
         return unpacked_vec;
     }
 
+    protected double[] UnpackDVec(byte[] data, int start)
+    {
+        double[] unpacked_vec = new double[3];
+        for (int i = 0; i < 3; i++)
+        {
+            if (System.BitConverter.IsLittleEndian) System.Array.Reverse(data, i * 8 + start, 8);
+            unpacked_vec[i] = System.BitConverter.ToDouble(data, i * 8 + start);
+        }
+        return unpacked_vec;
+    }
+
     protected bool CheckCRC32(byte[] data, int length)
     {
         if (System.BitConverter.IsLittleEndian) System.Array.Reverse(data, length - 4, 4);
@@ -108,16 +119,16 @@ class PacketBase
 
 class GPSPacket : PacketBase
 {
-    public Vector3 position;
+    public double[] position;
 
     public GPSPacket(RingBuffer pbuffer, int poffset) : base(pbuffer, poffset)
     {
-        position = new Vector3();
+        position = new double[3];
         packetType = PacketTypes.GPS;
     }
     public void Read()
     {
-        const int size = 17;
+        const int size = 29;
         byte[] data = buffer.readBytes(offset, size);
         if (data.Length != 0)
         {
@@ -128,7 +139,7 @@ class GPSPacket : PacketBase
                 return;
             }
 
-            position = UnpackVec(data, 1);
+            position = UnpackDVec(data, 1);
 
             status = PacketStatus.OK;
         }
@@ -349,7 +360,7 @@ public class PacketParser : MonoBehaviour
         {
             lock(parserThread.gpsLock)
             {
-                uiText.updatePosition(parserThread.gps);
+                uiText.updatePosition(new Vector3(parserThread.gps[0], parserThread.gps[1], parserThread.gps[2]));
             }
         }
 
@@ -396,7 +407,7 @@ public class ParserThread
     TextUi textUI;
 
     public object gpsLock = new object();
-    public Vector3 gps = new Vector3();
+    public double[] gps = new double[3];
     public bool updatedGps;
     public object imuLock = new object();
     public Vector3[] imu = {new Vector3(), new Vector3(), new Vector3()};
